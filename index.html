@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kintoun Coffee - Bulk Order Web</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#012640',
+                        ivory: '#EEEBE1',
+                        taupe: '#938370',
+                        secondary: '#3C586D',
+                        coolGrey: '#C0C9CE',
+                        muted: '#B8AD98',
+                        lightBeige: '#D6CFBF',
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        comfortaa: ['Comfortaa', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+        body { -ms-overflow-style: none; scrollbar-width: none; } 
+        select:invalid { color: #C0C9CE; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-primary text-primary font-poppins min-h-screen">
+
+    <header class="w-full max-w-md mx-auto pt-10 px-5 text-center relative z-10 flex flex-col items-center">
+        
+        <div class="relative z-20 w-[130px]">
+            <img src="https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/brand/kintoun-logo-bulk-order.svg" 
+                 alt="Kintoun Bulk Order Logo" 
+                 class="w-full h-auto">
+        </div>
+
+        <div class="relative z-10 w-[calc(100%+2.5rem)] -mx-5 flex justify-center mb-2 -mt-[130px] pointer-events-none">
+            <img src="https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/brand/hero-cup-kintoun.png" 
+                 alt="Kintoun Coffee Hero" 
+                 class="w-full h-auto object-cover">
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-5 relative z-20 pb-2">
+        <section id="formSection" class="scroll-mt-6 pb-6">
+            <div class="bg-white p-6 sm:p-7 rounded-[28px] shadow-2xl border border-lightBeige/40 space-y-5">
+
+                <div>
+                    <input type="text" id="custName" class="w-full bg-transparent border-b-[1.5px] border-lightBeige focus:border-primary py-2 outline-none transition placeholder-coolGrey text-primary text-sm font-medium disabled:opacity-50" placeholder="Nama">
+                </div>
+
+                <div>
+                    <input type="tel" id="custWA" class="w-full bg-transparent border-b-[1.5px] border-lightBeige focus:border-primary py-2 outline-none transition placeholder-coolGrey text-primary text-sm font-medium disabled:opacity-50" placeholder="Nomor WhatsApp">
+                </div>
+
+                <div class="relative">
+                    <input type="text" id="pickUpMethodDisplay" readonly class="w-full bg-transparent border-b-[1.5px] border-lightBeige focus:border-primary py-2 outline-none transition placeholder-coolGrey text-primary text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" placeholder="Pilih Metode Pemesanan" onclick="toggleMethodDropdown()">
+                    <input type="hidden" id="pickUpMethod" value="">
+                    
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-secondary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <div id="methodDropdown" class="hidden absolute top-[100%] left-0 w-full mt-1 bg-primary rounded-xl shadow-2xl z-50 flex-col px-5 pb-2 pt-1">
+                        <button type="button" onclick="selectMethod('Delivery By Pemesan')" class="w-full text-left text-ivory font-medium text-sm py-2.5 border-b-[1.5px] border-ivory/60 hover:text-lightBeige transition outline-none tracking-wide">Delivery By Pemesan</button>
+                        <button type="button" onclick="selectMethod('Self Pick-Up')" class="w-full text-left text-ivory font-medium text-sm py-2 border-ivory/60 hover:text-lightBeige transition outline-none tracking-wide">Self Pick-Up</button>
+                    </div>
+                </div>
+
+                <div class="pt-1 w-[calc(100%+3rem)] -mx-6">
+                    <label id="storeLabel" class="font-poppins font-medium text-coolGrey text-sm block mb-3 px-6 transition-colors duration-300">Pilih Lokasi Store</label>
+                    <div class="flex items-start overflow-x-auto gap-4 pb-6 pt-2 px-[35%] snap-x snap-mandatory hide-scrollbar scroll-smooth" id="storeContainer">
+                        <!-- Konten di-generate oleh JS -->
+                    </div>
+                </div>
+
+                <div class="border-t-[1.5px] border-lightBeige/90 pt-1"></div>
+
+                <button id="btnLanjutkan" onclick="proceedToMenu()" class="w-full bg-primary text-ivory text-sm font-bold py-3.5 rounded-xl hover:bg-secondary transition shadow-sm outline-none">
+                    Lanjutkan Pilih Menu
+                </button>
+            </div>
+        </section>
+
+        <section id="menuContainer" class="hidden transition-all duration-500 ease-in-out pb-32"></section>
+    </main>
+
+    <div id="floatingCart" class="fixed bottom-0 left-0 w-full p-4 bg-primary bg-opacity-95 backdrop-blur-md border-t border-secondary hidden z-40">
+        <div class="max-w-md mx-auto">
+            <button onclick="openCartModal()" class="w-full bg-ivory text-primary font-bold py-4 rounded-xl shadow-lg flex justify-between items-center px-6 hover:bg-lightBeige transition">
+                <div class="flex flex-col text-left">
+                    <span id="floatingTotalItems" class="text-xs text-secondary font-semibold">0 Item</span>
+                    <span id="floatingTotalPrice" class="text-lg font-bold">Rp 0</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span>Lihat Keranjang</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <div id="cartModal" class="fixed inset-0 bg-primary bg-opacity-80 backdrop-blur-sm hidden flex-col justify-end z-50 transition-opacity">
+        <div class="bg-ivory w-full max-w-md mx-auto h-[85vh] rounded-t-3xl shadow-2xl flex flex-col relative">
+            <div class="px-6 py-5 border-b border-lightBeige flex justify-between items-center bg-white rounded-t-3xl">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Detail Pesanan</h2>
+                </div>
+                <button onclick="closeCartModal()" class="text-muted hover:text-primary font-bold p-2 text-lg">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="cartItemsContainer" class="space-y-4"></div>
+            </div>
+
+            <div class="p-6 bg-white border-t border-lightBeige rounded-b-3xl">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-semibold text-secondary">Total Dibayar</span>
+                    <span id="modalTotalPrice" class="text-2xl font-semibold text-primary">Rp 0</span>
+                </div>
+                <button id="btnSubmitOrder" onclick="showQRISPopup()" class="w-full bg-primary text-ivory font-bold py-4 rounded-xl hover:bg-secondary transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    Konfirmasi Pesanan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="iceEduPopup" class="fixed inset-0 bg-primary bg-opacity-80 backdrop-blur-sm hidden justify-center items-center z-[60] p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-lightBeige">
+            <div class="w-14 h-14 bg-lightBeige rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-primary mb-2">Info Penyajian</h3>
+            <p class="text-sm text-secondary leading-relaxed mb-6">Kak, untuk menjaga kualitas produk, es baru akan kita tambahkan setelah Kakak atau Kurir pengantar tiba di toko. Mohon kesediaannya menunggu 5-10 menit tambahan ya Kak. Terima kasih atas pengertiannya.</p>
+            <button onclick="confirmIceEdu()" class="w-full bg-primary text-ivory font-bold py-3 rounded-xl hover:bg-secondary transition outline-none">
+                Mengerti & Lanjutkan
+            </button>
+        </div>
+    </div>
+
+    <div id="qrisPopup" class="fixed inset-0 bg-primary bg-opacity-80 backdrop-blur-sm hidden justify-center items-center z-[60] p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-lightBeige">
+            <div class="w-14 h-14 bg-lightBeige rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-primary mb-2">Pembayaran via QRIS</h3>
+            <p class="text-sm text-secondary leading-relaxed mb-6">Khusus pesanan ini, pembayaran dilakukan via QRIS ya Kak... Silakan klik <strong>Lanjutkan</strong> untuk terhubung ke WhatsApp Kasir Toko terpilih dan mendapatkan kode QR.</p>
+            <div class="flex space-x-3">
+                <button onclick="closeQRISPopup()" class="flex-1 bg-ivory text-taupe font-bold py-3 rounded-xl hover:bg-lightBeige transition outline-none">Batal</button>
+                <button onclick="submitOrder()" class="flex-1 bg-primary text-ivory font-bold py-3 rounded-xl hover:bg-secondary transition outline-none">Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlertPopup" class="fixed inset-0 bg-primary bg-opacity-80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-lightBeige">
+            <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-primary mb-2">Perhatian</h3>
+            <p id="customAlertMessage" class="text-sm text-secondary leading-relaxed mb-6">Pesan peringatan di sini.</p>
+            <button onclick="closeCustomAlert()" class="w-full bg-primary text-ivory font-bold py-3 rounded-xl hover:bg-secondary transition outline-none">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="fixed inset-0 bg-primary bg-opacity-90 backdrop-blur-sm hidden flex-col justify-center items-center z-[70]">
+        <div class="w-12 h-12 border-4 border-ivory border-t-taupe rounded-full animate-spin mb-4"></div>
+        <p class="font-bold text-ivory tracking-wide">Memproses Pesanan...</p>
+    </div>
+
+<script>
+    const N8N_CREATE_ORDER_URL = 'https://n8n-h238.srv1866922.hstgr.cloud/webhook/create-order-dev';
+
+    const storeList = [
+        {
+            id: 'malang_galunggung',
+            name: 'MALANG - GALUNGGUNG',
+            address: 'Jl. Galunggung No.38, Gading Kasri, Kec. Klojen, Kota Malang, Jawa Timur 65115',
+            img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/stores/malang-galunggung.png', 
+            wa: '628213904471',
+            status: 'open'
+        },
+        {
+            id: 'kediri_erlangga',
+            name: 'KEDIRI - ERLANGGA',
+            address: 'Jl. Erlangga No.21, Ngadirejo, Kec. Kota, Kota Kediri, Jawa Timur 64129',
+            img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/stores/kediri-erlangga.png', 
+            wa: '6285877043217',
+            status: 'soft_opening'
+        },
+        {
+            id: 'coming_soon',
+            name: 'COMING SOON',
+            address: 'Tunggu Kami di Kota Kesayangan Kakak ya...',
+            img: '',
+            wa: '',
+            status: 'coming_soon'
+        }
+    ];
+
+    let selectedStore = null;
+    let isFormLocked = false; 
+
+    const menuData = [
+        { category: 'Kintoun Signature', items: [
+            { id: 'S1', name: 'Kopi Susu Kintoun', price: 15000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/kopi-susu-kintoun.png' },
+            { id: 'S2', name: 'Sea Salt Butterscotch', price: 17000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/sea-salt-butterscotch.png' },
+            { id: 'S3', name: 'Es Kopi Susu Tiramisu', price: 17000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/es-kopi-susu-tiramisu.png' },
+            { id: 'S4', name: 'Double Shot Iced Shaken', price: 20000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/double-shoot-iced-shaken.png' }
+        ]},
+        { category: 'Kintoun Black Series', items: [
+            { id: 'B1', name: 'Americano Iced Black', price: 12000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/americano-iced-black.png' },
+            { id: 'B2', name: 'Sunset Peach Americano', price: 17000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/sunset-peach-americano.png' }
+        ]},
+        { category: 'Selain Kopi', items: [
+            { id: 'N1', name: 'Matcha Sea Salt', price: 17000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/matcha-sea-salt.png' },
+            { id: 'N2', name: 'Choc-Cloud', price: 17000, img: 'https://raw.githubusercontent.com/muafi-learner/bulk-order-system/main/assets/menu/choc-cloud.png' }
+        ]}
+    ];
+
+    let cart = {}; 
+
+    function toggleMethodDropdown() {
+        if (isFormLocked) return;
+        const dropdown = document.getElementById('methodDropdown');
+        if (dropdown.classList.contains('hidden')) {
+            dropdown.classList.remove('hidden');
+            dropdown.classList.add('flex');
+        } else {
+            dropdown.classList.add('hidden');
+            dropdown.classList.remove('flex');
+        }
+    }
+
+    function selectMethod(method) {
+        document.getElementById('pickUpMethod').value = method;
+        document.getElementById('pickUpMethodDisplay').value = method;
+        document.getElementById('pickUpMethodDisplay').classList.replace('text-primary', 'text-secondary'); 
+        toggleMethodDropdown();
+    }
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('methodDropdown');
+        const display = document.getElementById('pickUpMethodDisplay');
+        if (!dropdown.contains(event.target) && event.target !== display) {
+            dropdown.classList.add('hidden');
+            dropdown.classList.remove('flex');
+        }
+    });
+
+    function renderStoreCards() {
+        const container = document.getElementById('storeContainer');
+        let html = '';
+
+        storeList.forEach(store => {
+            let clickAction = '';
+            let cursorClass = '';
+
+            if (store.status === 'open') {
+                clickAction = `onclick="selectStoreCard('${store.id}')"`;
+                cursorClass = 'cursor-pointer';
+            } else if (store.status === 'soft_opening') {
+                clickAction = `onclick="showCustomAlert('Store ${store.name} masih dalam tahap persiapan Soft Opening nih Kak. Pantau terus IG kita untuk info tanggal resminya ya!')"`;
+                cursorClass = 'cursor-not-allowed';
+            } else {
+                clickAction = `onclick="showCustomAlert('Tunggu kehadiran Kintoun di kota kesayangan Kakak ya. Doakan segera menyusul!')"`;
+                cursorClass = 'cursor-not-allowed';
+            }
+            
+            const imgContent = store.img 
+                ? `<img src="${store.img}" onerror="this.src='https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=80'" class="h-full w-auto block max-w-none" alt="${store.name}">`
+                : `<div class="h-full w-[140px] bg-gradient-to-b from-gray-700 to-gray-900 flex items-center justify-center"></div>`;
+
+            html += `
+            <div id="card_store_${store.id}" ${clickAction} class="store-card snap-center shrink-0 w-min h-[210px] rounded-[24px] overflow-hidden transition-all duration-300 border-2 border-transparent bg-taupe text-white flex flex-col relative p-1.5 opacity-50 blur-[1.5px] scale-90 ${cursorClass}">
+                
+                <div class="h-[120px] w-max bg-gray-200 rounded-[16px] overflow-hidden relative shrink-0">
+                    ${imgContent}
+                    <div id="badge_selected_${store.id}" class="hidden absolute top-2 right-2 bg-primary text-ivory rounded-full p-1 shadow-md">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                
+                <div class="px-1.5 pt-3 pb-2 flex-grow flex flex-col justify-start w-full">
+                    <h4 class="font-comfortaa font-bold text-[10px] tracking-wide leading-snug mb-1 text-white uppercase">${store.name}</h4>
+                    <p class="font-comfortaa font-normal text-[8.5px] leading-tight text-white/90 line-clamp-3">${store.address}</p>
+                </div>
+            </div>`;
+        });
+
+        container.innerHTML = html;
+        
+        container.addEventListener('scroll', updateCenterFocus);
+        setTimeout(updateCenterFocus, 100);
+    }
+
+    function updateCenterFocus() {
+        const container = document.getElementById('storeContainer');
+        if (!container) return;
+        
+        const cards = container.querySelectorAll('.store-card');
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        let closestCard = null;
+        let minDistance = Infinity;
+
+        cards.forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenter = cardRect.left + cardRect.width / 2;
+            const distance = Math.abs(containerCenter - cardCenter);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCard = card;
+            }
+        });
+
+        cards.forEach(card => {
+            if (card === closestCard) {
+                card.classList.remove('opacity-50', 'blur-[1.5px]', 'scale-90');
+                card.classList.add('opacity-100', 'blur-0', 'scale-100');
+            } else {
+                card.classList.add('opacity-50', 'blur-[1.5px]', 'scale-90');
+                card.classList.remove('opacity-100', 'blur-0', 'scale-100');
+            }
+        });
+    }
+
+    function clearStoreSelection() {
+        selectedStore = null;
+        
+        const modalLabel = document.getElementById('modalStoreLabel');
+        if (modalLabel) modalLabel.innerText = '-';
+        
+        storeList.forEach(s => {
+            const card = document.getElementById(`card_store_${s.id}`);
+            const badge = document.getElementById(`badge_selected_${s.id}`);
+            if (card) {
+                card.classList.remove('border-primary');
+                card.classList.add('border-transparent');
+            }
+            if (badge) badge.classList.add('hidden');
+        });
+
+        const storeLabel = document.getElementById('storeLabel');
+        if (storeLabel) {
+            storeLabel.innerText = 'Pilih Lokasi Store';
+            storeLabel.classList.remove('text-primary');
+            storeLabel.classList.add('text-coolGrey');
+        }
+    }
+
+    function selectStoreCard(id) {
+        if (isFormLocked) {
+            showCustomAlert('Kakak sedang dalam mode pilih menu. Klik tombol "Kembali" terlebih dahulu jika ingin merubah lokasi Store.');
+            return;
+        }
+
+        if (selectedStore && selectedStore.id === id) {
+            clearStoreSelection();
+            return;
+        }
+
+        selectedStore = storeList.find(s => s.id === id);
+
+        storeList.forEach(s => {
+            const card = document.getElementById(`card_store_${s.id}`);
+            const badge = document.getElementById(`badge_selected_${s.id}`);
+            if (card) {
+                card.classList.remove('border-primary');
+                card.classList.add('border-transparent');
+            }
+            if (badge) badge.classList.add('hidden');
+        });
+
+        const activeCard = document.getElementById(`card_store_${id}`);
+        const activeBadge = document.getElementById(`badge_selected_${id}`);
+        if (activeCard) {
+            activeCard.classList.remove('border-transparent');
+            activeCard.classList.add('border-primary');
+            activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+        if (activeBadge) activeBadge.classList.remove('hidden');
+
+        const modalLabel = document.getElementById('modalStoreLabel');
+        if (modalLabel) {
+            modalLabel.innerText = `Store: ${selectedStore.name}`;
+        }
+
+        const storeLabel = document.getElementById('storeLabel');
+        if (storeLabel) {
+            storeLabel.innerText = `Store ${selectedStore.name}`;
+            storeLabel.classList.remove('text-coolGrey');
+            storeLabel.classList.add('text-primary'); 
+        }
+    }
+
+    const inputElements = ['custName', 'custWA'];
+    inputElements.forEach(id => {
+        document.getElementById(id).addEventListener('focus', () => {
+            setTimeout(() => {
+                document.getElementById('formSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300); 
+        });
+    });
+
+    function showCustomAlert(message) {
+        document.getElementById('customAlertMessage').innerText = message;
+        document.getElementById('customAlertPopup').classList.remove('hidden');
+        document.getElementById('customAlertPopup').classList.add('flex');
+    }
+
+    function closeCustomAlert() {
+        document.getElementById('customAlertPopup').classList.add('hidden');
+        document.getElementById('customAlertPopup').classList.remove('flex');
+    }
+
+    function proceedToMenu() {
+        const name = document.getElementById('custName').value.trim();
+        const wa = document.getElementById('custWA').value.trim();
+        const pickup = document.getElementById('pickUpMethod').value;
+
+        if (!name || !wa || !pickup) {
+            showCustomAlert('Isi Nama, Nomor WhatsApp, dan Metode Pemesanan lebih dulu Kak!');
+            return;
+        }
+
+        if (!selectedStore) {
+            showCustomAlert('Silakan Pilih Lokasi Store tujuan Kakak terlebih dahulu!');
+            return;
+        }
+
+        document.getElementById('iceEduPopup').classList.remove('hidden');
+        document.getElementById('iceEduPopup').classList.add('flex');
+    }
+
+    function confirmIceEdu() {
+        document.getElementById('iceEduPopup').classList.add('hidden');
+        document.getElementById('iceEduPopup').classList.remove('flex');
+
+        document.getElementById('custName').disabled = true;
+        document.getElementById('custWA').disabled = true;
+        document.getElementById('pickUpMethodDisplay').disabled = true;
+        document.getElementById('btnLanjutkan').classList.add('hidden');
+        
+        isFormLocked = true;
+
+        const menuContainer = document.getElementById('menuContainer');
+        menuContainer.classList.remove('hidden');
+
+        setTimeout(() => {
+            menuContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    function backToForm() {
+        document.getElementById('menuContainer').classList.add('hidden');
+        document.getElementById('custName').disabled = false;
+        document.getElementById('custWA').disabled = false;
+        document.getElementById('pickUpMethodDisplay').disabled = false;
+        document.getElementById('btnLanjutkan').classList.remove('hidden');
+        document.getElementById('floatingCart').classList.add('hidden');
+        
+        isFormLocked = false;
+        
+        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function renderMenu() {
+        const container = document.getElementById('menuContainer');
+        let html = `
+        <div class="mt-6 mb-2">
+            <button onclick="backToForm()" class="text-ivory font-semibold text-sm flex items-center hover:text-lightBeige transition outline-none">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Kembali
+            </button>
+        </div>`;
+
+        menuData.forEach(cat => {
+            html += `<h3 class="text-l font-semibold text-lightBeige uppercase tracking-widest mt-7 mb-3">${cat.category}</h3>`;
+            html += `<div class="space-y-4">`;
+            cat.items.forEach(item => {
+                html += `
+                <div class="bg-white p-3 sm:p-4 rounded-[20px] shadow-lg border border-transparent flex items-center space-x-3 sm:space-x-4 group">
+                    <img src="${item.img}" alt="${item.name}" loading="lazy" class="w-20 sm:w-24 h-28 sm:h-32 object-contain flex-shrink-0 drop-shadow-sm">
+                    <div class="flex-1 flex flex-col justify-center">
+                        <p class="font-bold text-primary text-[15px] sm:text-[16px] leading-tight">${item.name}</p>
+                        <p class="text-[13px] font-semibold text-secondary mt-1 mb-3">Rp ${item.price.toLocaleString('id-ID')}</p>
+                        <div class="flex space-x-1.5 w-full">
+                            <button id="chip_less_${item.id}" onclick="addToCart('${item.id}', '${item.name}', ${item.price}, 'Less Ice')" class="flex-1 text-[10px] sm:text-[11px] font-bold py-2 rounded-lg bg-ivory text-taupe border border-lightBeige hover:bg-lightBeige transition outline-none">Less Ice</button>
+                            <button id="chip_no_${item.id}" onclick="addToCart('${item.id}', '${item.name}', ${item.price}, 'No Ice')" class="flex-1 text-[10px] sm:text-[11px] font-bold py-2 rounded-lg bg-ivory text-taupe border border-lightBeige hover:bg-lightBeige transition outline-none">No Ice</button>
+                            <button id="btn_add_${item.id}" onclick="addToCart('${item.id}', '${item.name}', ${item.price}, 'Normal Ice')" class="flex-[1.2] bg-primary text-ivory text-[11px] sm:text-[12px] font-bold py-2 rounded-lg hover:bg-secondary transition shadow-sm outline-none">Tambah</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function addToCart(id, name, price, iceLevel) {
+        let cartKey = `${id}_${iceLevel}`;
+        if (!cart[cartKey]) {
+            cart[cartKey] = { id, name, price, iceLevel, qty: 0 };
+        }
+        cart[cartKey].qty += 1;
+        updateFloatingCart();
+
+        let targetBtnId = iceLevel === 'Less Ice' ? `chip_less_${id}` :
+                          iceLevel === 'No Ice' ? `chip_no_${id}` : `btn_add_${id}`;
+        
+        const targetBtn = document.getElementById(targetBtnId);
+        
+        const revertText = iceLevel === 'Less Ice' ? 'Less Ice' : 
+                           iceLevel === 'No Ice' ? 'No Ice' : 'Tambah';
+                           
+        targetBtn.innerText = "✓ Masuk";
+        
+        if (iceLevel === 'Normal Ice') {
+            targetBtn.classList.remove('bg-primary');
+            targetBtn.classList.add('bg-taupe');
+        } else {
+            targetBtn.classList.remove('bg-ivory', 'text-taupe');
+            targetBtn.classList.add('bg-taupe', 'text-white');
+        }
+
+        setTimeout(() => {
+            targetBtn.innerText = revertText;
+            if (iceLevel === 'Normal Ice') {
+                targetBtn.classList.remove('bg-taupe');
+                targetBtn.classList.add('bg-primary');
+            } else {
+                targetBtn.classList.remove('bg-taupe', 'text-white');
+                targetBtn.classList.add('bg-ivory', 'text-taupe');
+            }
+        }, 600);
+    }
+
+    function adjustQty(cartKey, delta) {
+        if (cart[cartKey]) {
+            cart[cartKey].qty += delta;
+            if (cart[cartKey].qty <= 0) {
+                delete cart[cartKey];
+            }
+            updateFloatingCart();
+            renderCartModalItems();
+        }
+    }
+
+    function updateFloatingCart() {
+        let totalItems = 0;
+        let totalPrice = 0;
+        Object.values(cart).forEach(item => {
+            totalItems += item.qty;
+            totalPrice += (item.price * item.qty);
+        });
+
+        const floatingCart = document.getElementById('floatingCart');
+        const btnSubmitOrder = document.getElementById('btnSubmitOrder');
+
+        if (totalItems > 0) {
+            floatingCart.classList.remove('hidden');
+            document.getElementById('floatingTotalItems').innerText = `${totalItems} Produk`;
+            document.getElementById('floatingTotalPrice').innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+            document.getElementById('modalTotalPrice').innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+
+            if (totalItems < 15) {
+                btnSubmitOrder.disabled = true;
+                btnSubmitOrder.innerText = `Min. 15 Cup (Kurang ${15 - totalItems})`;
+            } else {
+                btnSubmitOrder.disabled = false;
+                btnSubmitOrder.innerText = 'Konfirmasi Pesanan';
+            }
+        } else {
+            floatingCart.classList.add('hidden');
+            closeCartModal(); 
+        }
+    }
+
+    function openCartModal() {
+        let totalItems = 0;
+        Object.values(cart).forEach(item => totalItems += item.qty);
+
+        if (totalItems < 15) {
+            showCustomAlert('Mohon maaf Kak, sistem ini khusus Bulk Order dengan minimum pemesanan 15 produk.');
+            return;
+        }
+
+        renderCartModalItems();
+        document.getElementById('cartModal').classList.remove('hidden');
+        document.getElementById('cartModal').classList.add('flex');
+    }
+
+    function closeCartModal() {
+        document.getElementById('cartModal').classList.add('hidden');
+        document.getElementById('cartModal').classList.remove('flex');
+    }
+
+    function renderCartModalItems() {
+        const container = document.getElementById('cartItemsContainer');
+        let html = '';
+
+        Object.keys(cart).forEach(key => {
+            let item = cart[key];
+            let iceLabelUI = item.iceLevel === 'Normal Ice' ? '' : ` <span class="text-taupe font-medium text-[13px]">(${item.iceLevel})</span>`;
+
+            html += `
+            <div class="flex justify-between items-center py-3 border-b border-lightBeige last:border-0">
+                <div class="flex-1 pr-4">
+                    <p class="font-bold text-primary text-sm">${item.name}${iceLabelUI}</p>
+                    <p class="text-sm font-semibold text-secondary mt-1">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
+                </div>
+                <div class="flex items-center space-x-3 bg-ivory rounded-lg border border-lightBeige p-1">
+                    <button onclick="adjustQty('${key}', -1)" class="w-7 h-7 flex justify-center items-center rounded text-primary hover:bg-lightBeige font-bold transition">-</button>
+                    <span class="font-bold text-sm text-primary w-4 text-center">${item.qty}</span>
+                    <button onclick="adjustQty('${key}', 1)" class="w-7 h-7 flex justify-center items-center bg-primary text-ivory rounded font-bold hover:bg-secondary transition">+</button>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function showQRISPopup() {
+        let totalItems = 0;
+        Object.values(cart).forEach(item => totalItems += item.qty);
+        if (totalItems < 15) {
+            showCustomAlert('Total pesanan berubah. Minimum pemesanan tetap 15 produk ya Kak.');
+            return;
+        }
+        document.getElementById('qrisPopup').classList.remove('hidden');
+        document.getElementById('qrisPopup').classList.add('flex');
+    }
+
+    function closeQRISPopup() {
+        document.getElementById('qrisPopup').classList.add('hidden');
+        document.getElementById('qrisPopup').classList.remove('flex');
+    }
+
+    async function submitOrder() {
+        closeQRISPopup(); 
+
+        const method = 'QRIS'; 
+        const pickupMethod = document.getElementById('pickUpMethod').value;
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+        document.getElementById('loadingOverlay').classList.add('flex');
+
+        let cartArray = Object.values(cart);
+        let totalPesanan = cartArray.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+        let orderDetailsWA = cartArray.map(item => {
+            return item.iceLevel === 'Normal Ice' ? `• ${item.name} x${item.qty}` : `• ${item.name} (${item.iceLevel}) x${item.qty}`;
+        }).join('\n');
+
+        const orderId = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+        const waktu = new Date().toLocaleString('id-ID');
+
+        const payload = {
+            orderId: orderId,
+            waktu: waktu,
+            name: document.getElementById('custName').value,
+            wa: document.getElementById('custWA').value,
+            address: pickupMethod,
+            orders: orderDetailsWA,
+            total: totalPesanan,
+            paymentMethod: method,
+            storeLocation: selectedStore.name,
+            status: "Pesanan Masuk"
+        };
+
+        try {
+            const response = await fetch(N8N_CREATE_ORDER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+                let waText = `Halo Kasir Kintoun ${selectedStore.name}!\nAku udah order via web ya.... Ini detailnya:\n\n*Lokasi Store:* ${selectedStore.name}\n*Nama:* ${payload.name}\n*Pick Up:* ${payload.address}\n\n*Pesanan:*\n${orderDetailsWA}\n\n*Total:* Rp ${payload.total.toLocaleString('id-ID')}\n*Metode:* ${payload.paymentMethod}\n\n_Aku minta kode QRIS untuk pembayaran pesanan ini ya...._`;
+                
+                const targetWA = selectedStore.wa || '628213904471';
+                const waUrl = `https://wa.me/${targetWA}?text=${encodeURIComponent(waText)}`;
+                window.location.href = waUrl;
+            } else {
+                 throw new Error("Gagal kirim ke n8n");
+            }
+        } catch (error) {
+            showCustomAlert('Terjadi kesalahan koneksi ke server n8n.');
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loadingOverlay').classList.remove('flex');
+        }
+    }
+
+    renderStoreCards();
+    renderMenu();
+</script>
+</body>
+</html>
